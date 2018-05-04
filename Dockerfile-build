@@ -1,0 +1,26 @@
+# Separate dockerfile for building a production ready package (dist)
+# Created file, Dockerfile-build, because we don't need dev-dependencies on the running docker container
+# To build and run
+# docker build -t maestro:build -f Dockerfile-build .
+# docker run --rm -it -v $(pwd)/dist:/app/dist maestro:build
+FROM kaptest/docker-atomapi-node:v2
+
+WORKDIR /app
+
+# install yarn to use instead of npm install
+## I had trouble installing yarn
+# RUN npm install -g yarn --loglevel warn
+
+# Install app dependencies
+COPY package.json /app/
+
+# should use yarn install cause npm install is slow :(
+RUN npm install --quiet
+
+# Bundle app source
+COPY . /app
+
+# Volume where the distributable site will be dropped
+VOLUME /app/dist
+
+CMD bash -c "npm run build"
